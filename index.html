@@ -175,7 +175,9 @@
   .clue-question{font-family:var(--font-display);font-size:23px;color:var(--cream);line-height:1.4;margin-bottom:22px;}
   .clue-answer{font-size:16px;color:var(--text);line-height:1.6;margin-bottom:16px;}
   .clue-images{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
-  .clue-images img{max-width:260px;max-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);object-fit:cover;}
+  .clue-images img{max-width:260px;max-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);object-fit:cover;cursor:pointer;transition:transform .12s ease;}
+  .clue-images img:hover{transform:scale(1.03);}
+  .clue-images img:fullscreen{max-width:100%;max-height:100%;object-fit:contain;background:#000;}
   .score-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
   .modal-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:18px 0 8px;font-weight:600;}
   .faq-item{margin-bottom:18px;}
@@ -965,7 +967,7 @@ function renderClueEditor(){
   var catName = board.categories[m.catIdx].name || ("Category "+(m.catIdx+1));
 
   var thumbs = cl.images.map(function(img, ii){
-    return '<div class="thumb"><img src="'+img+'"><div class="rm" onclick="App.removeClueImage('+ii+')">✕</div></div>';
+    return '<div class="thumb"><img src="'+img+'" onclick="App.expandImage(this)" style="cursor:pointer;"><div class="rm" onclick="App.removeClueImage('+ii+')">✕</div></div>';
   }).join("");
 
   var videoThumbs = cl.videos.map(function(v, vi){
@@ -1013,7 +1015,7 @@ function renderPlayClue(){
   var game = getGame(board.id);
   var used = game.used[key];
 
-  var imagesHtml = cl.images && cl.images.length ? '<div class="clue-images">'+cl.images.map(function(i){ return '<img src="'+i+'">'; }).join("")+'</div>' : "";
+  var imagesHtml = cl.images && cl.images.length ? '<div class="clue-images">'+cl.images.map(function(i){ return '<img src="'+i+'" onclick="App.expandImage(this)">'; }).join("")+'</div>' : "";
   var videosHtml = (used || m.phase === "bride") ? clueVideosHtml(cl) : "";
   var questionText = cl.question.trim() ? escapeHtml(cl.question) : "(No question written for this clue — click Edit on the builder to add one.)";
   var answerText = cl.answer.trim() ? escapeHtml(cl.answer) : (cl.images.length || cl.videos.length || cl.videoLink ? "" : "(No answer written for this clue.)");
@@ -1285,6 +1287,10 @@ App.removeClueImage = function(idx){
   clue.images.splice(idx,1);
   saveStore();
   renderModal();
+};
+App.expandImage = function(imgEl){
+  var fn = imgEl.requestFullscreen || imgEl.webkitRequestFullscreen || imgEl.msRequestFullscreen;
+  if(fn) fn.call(imgEl);
 };
 App.addClueVideos = function(evt){
   var files = Array.from(evt.target.files || []);
