@@ -66,7 +66,8 @@
   .hero .eyebrow{font-family:var(--font-tile);letter-spacing:3px;color:var(--gold);font-size:15px;}
   .hero h1{font-size:44px;color:var(--cream);margin:6px 0 10px;}
   .hero h1 span{color:var(--bride);}
-  .hero p{color:var(--muted);font-size:15.5px;max-width:520px;margin:0 auto;}
+  .hero p{color:var(--muted);font-size:15.5px;max-width:560px;margin:0 auto;}
+  .hero p.hero-hook{color:var(--cream);font-weight:700;font-size:18px;max-width:600px;margin:0 auto 10px;}
   .hero-actions{display:flex;gap:14px;justify-content:center;margin-top:26px;flex-wrap:wrap;}
 
   .section-title{display:flex;align-items:center;justify-content:space-between;margin:38px 0 16px;}
@@ -798,7 +799,8 @@ function renderHome(){
     '<div class="hero">'+
       '<div class="eyebrow">DIY GAME NIGHT</div>'+
       '<h1>💍 Bachelorette <span>Newlywed Game</span></h1>'+
-      '<p>Great game to play at your bachelorette party to see how well you know your future spouse!</p>'+
+      '<p class="hero-hook">How Well Do You Know Your Groom&hellip; and how well does he know YOU?</p>'+
+      '<p>The ultimate bachelorette party showdown! Test how well you really know your future spouse with this ride-or-die game night activity.</p>'+
       '<div class="hero-actions">'+
         '<button class="btn btn-primary" onclick="App.createBoard()">+ Create New Board</button>'+
         '<button class="btn btn-ghost" onclick="App.loadExample()">✨ Try the Example Board (Jack &amp; Jill)</button>'+
