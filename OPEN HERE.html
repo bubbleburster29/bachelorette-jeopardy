@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bachelorette Jeopardy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0c1338;
+    --navy-2:#141d4d;
+    --navy-3:#1c2760;
+    --gold:#e3bd54;
+    --gold-light:#f6e3a1;
+    --bride:#ff6fa5;
+    --bride-dark:#c94d80;
+    --cream:#fff8ef;
+    --text:#f4f1ff;
+    --muted:#aab0d6;
+    --danger:#e05266;
+    --success:#3fbd7a;
+    --font-display:'Playfair Display', serif;
+    --font-tile:'Bebas Neue', sans-serif;
+    --font-body:'Poppins', sans-serif;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    color:var(--text);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(227,189,84,0.10), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(155,127,232,0.14), transparent 45%),
+      radial-gradient(circle at 90% 10%, rgba(255,111,165,0.10), transparent 40%),
+      linear-gradient(160deg, var(--navy), #070a20 70%);
+    min-height:100vh;
+  }
+  #app{max-width:1180px;margin:0 auto;padding:28px 20px 60px;}
+  h1,h2,h3{font-family:var(--font-display);margin:0;}
+  button{font-family:var(--font-body);cursor:pointer;border:none;}
+  input,textarea{font-family:var(--font-body);}
+  a{color:inherit;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 20px;border-radius:999px;font-weight:600;font-size:14.5px;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn-primary{background:linear-gradient(135deg, var(--gold-light), var(--gold));color:#2b220a;box-shadow:0 6px 18px rgba(227,189,84,0.28);}
+  .btn-bride{background:linear-gradient(135deg,#ffa5c8,var(--bride));color:#3a0f22;box-shadow:0 6px 18px rgba(255,111,165,0.28);}
+  .btn-ghost{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.14);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.12);}
+  .btn-danger{background:rgba(224,82,102,0.15);color:#ffb6c0;border:1px solid rgba(224,82,102,0.4);}
+  .btn-danger:hover{background:rgba(224,82,102,0.28);}
+  .btn-sm{padding:7px 13px;font-size:12.5px;border-radius:999px;}
+  .btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+
+  /* ---------- home ---------- */
+  .hero{text-align:center;padding:38px 20px 26px;}
+  .hero .eyebrow{font-family:var(--font-tile);letter-spacing:3px;color:var(--gold);font-size:15px;}
+  .hero h1{font-size:44px;color:var(--cream);margin:6px 0 10px;}
+  .hero h1 span{color:var(--bride);}
+  .hero p{color:var(--muted);font-size:15.5px;max-width:520px;margin:0 auto;}
+  .hero-actions{display:flex;gap:14px;justify-content:center;margin-top:26px;flex-wrap:wrap;}
+
+  .section-title{display:flex;align-items:center;justify-content:space-between;margin:38px 0 16px;}
+  .section-title h2{font-size:22px;color:var(--cream);}
+
+  .board-grid-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .board-card{
+    background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.09);
+    border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;
+  }
+  .board-card h3{font-size:19px;color:var(--cream);}
+  .progress-pill{
+    align-self:flex-start;font-size:11.5px;font-weight:600;padding:4px 11px;border-radius:999px;
+    background:rgba(227,189,84,0.14);color:var(--gold-light);border:1px solid rgba(227,189,84,0.3);
+  }
+  .board-card .meta{font-size:12px;color:var(--muted);}
+  .board-card .card-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .empty-state{color:var(--muted);font-size:14px;padding:26px;text-align:center;border:1px dashed rgba(255,255,255,0.15);border-radius:var(--radius);}
+
+  /* ---------- top bar (builder / play) ---------- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  .topbar-left{display:flex;align-items:center;gap:14px;min-width:0;}
+  .title-input{
+    background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,0.18);
+    color:var(--cream);font-family:var(--font-display);font-weight:700;font-size:24px;
+    padding:4px 2px;min-width:220px;max-width:420px;
+  }
+  .title-input:focus{outline:none;border-bottom-color:var(--gold);}
+  .topbar-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+  .scoreboard{display:flex;gap:10px;}
+  .score-chip{
+    display:flex;align-items:center;gap:9px;padding:8px 16px;border-radius:999px;
+    font-weight:700;font-size:15px;border:1px solid rgba(255,255,255,0.14);
+  }
+  .score-chip.bride{background:rgba(255,111,165,0.14);color:var(--bride);}
+  .score-chip .amt{font-family:var(--font-tile);font-size:19px;letter-spacing:0.5px;}
+
+  /* ---------- builder grid ---------- */
+  .categories-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .categories-bar .count{font-size:12.5px;color:var(--muted);font-weight:600;}
+  .builder-grid{display:grid;grid-template-columns:repeat(var(--cat-count,6),1fr);gap:10px;}
+  .cat-head{display:flex;flex-direction:row;align-items:center;gap:6px;}
+  .cat-head input{
+    flex:1;min-width:0;
+    background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.14);color:var(--cream);
+    border-radius:10px;padding:9px 10px;font-weight:600;font-size:13.5px;text-align:center;
+  }
+  .cat-head input:focus{outline:none;border-color:var(--gold);}
+  .cat-remove{
+    flex-shrink:0;width:28px;height:28px;border-radius:8px;font-size:12px;
+    background:rgba(224,82,102,0.15);color:#ffb6c0;border:1px solid rgba(224,82,102,0.4);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .cat-remove:hover{background:rgba(224,82,102,0.3);}
+  .clue-cell{
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:12px;
+    min-height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    padding:8px;text-align:center;transition:background .12s;
+  }
+  .clue-cell:hover{background:rgba(255,255,255,0.08);}
+  .clue-cell .val{font-family:var(--font-tile);color:var(--gold);font-size:19px;letter-spacing:0.5px;}
+  .clue-cell .snippet{font-size:10.5px;color:var(--muted);line-height:1.3;max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .clue-cell.filled{border-color:rgba(63,189,122,0.4);}
+  .clue-cell.filled .val{color:var(--success);}
+
+  /* ---------- play board ---------- */
+  .board{display:grid;grid-template-columns:repeat(var(--cat-count,6),1fr);gap:10px;}
+  .cat-header{
+    background:linear-gradient(160deg, var(--navy-3), var(--navy-2));
+    border:1px solid rgba(227,189,84,0.25);border-radius:12px;padding:14px 8px;
+    text-align:center;font-family:var(--font-tile);letter-spacing:0.5px;color:var(--gold-light);
+    font-size:15px;min-height:56px;display:flex;align-items:center;justify-content:center;
+  }
+  .tile{
+    background:linear-gradient(160deg, var(--navy-2), var(--navy));
+    border:1px solid rgba(227,189,84,0.22);border-radius:12px;
+    font-family:var(--font-tile);font-size:30px;color:var(--gold);letter-spacing:1px;
+    min-height:78px;display:flex;align-items:center;justify-content:center;position:relative;
+    transition:transform .1s ease, box-shadow .1s ease;
+  }
+  .tile:not(.used):hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(227,189,84,0.18);cursor:pointer;}
+  .tile.used{color:rgba(244,241,255,0.25);background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);cursor:pointer;}
+  .tile .badge{position:absolute;bottom:6px;right:9px;font-size:14px;}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(4,6,20,0.78);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:100;padding:22px;
+  }
+  .modal-card{
+    background:linear-gradient(160deg,#161f52,#0d1338);border:1px solid rgba(227,189,84,0.3);
+    border-radius:20px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;
+    padding:30px 30px 26px;position:relative;box-shadow:0 30px 80px rgba(0,0,0,0.55);
+  }
+  .modal-close{
+    position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.08);color:var(--muted);
+    width:32px;height:32px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;
+  }
+  .modal-close:hover{background:rgba(255,255,255,0.16);color:var(--text);}
+  .clue-pill{
+    display:inline-block;font-family:var(--font-tile);letter-spacing:0.5px;color:var(--gold);
+    background:rgba(227,189,84,0.12);border:1px solid rgba(227,189,84,0.3);padding:5px 14px;
+    border-radius:999px;font-size:14px;margin-bottom:16px;
+  }
+  .clue-question{font-family:var(--font-display);font-size:23px;color:var(--cream);line-height:1.4;margin-bottom:22px;}
+  .clue-answer{font-size:16px;color:var(--text);line-height:1.6;margin-bottom:16px;}
+  .clue-images{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+  .clue-images img{max-width:260px;max-height:220px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);object-fit:cover;}
+  .score-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .modal-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:18px 0 8px;font-weight:600;}
+  .faq-item{margin-bottom:18px;}
+  .faq-q{font-family:var(--font-display);font-weight:700;font-size:15.5px;color:var(--gold-light);margin-bottom:6px;}
+  .faq-a{font-size:14px;color:var(--text);line-height:1.6;}
+
+  /* ---------- clue editor (builder modal) ---------- */
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600;}
+  .field textarea, .field input[type=text]{
+    width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.16);
+    color:var(--text);border-radius:10px;padding:10px 12px;font-size:14.5px;resize:vertical;
+  }
+  .field textarea:focus, .field input:focus{outline:none;border-color:var(--gold);}
+  .thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+  .thumb{position:relative;}
+  .thumb img{width:84px;height:84px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,0.18);}
+  .thumb .rm, .video-thumb .rm{
+    position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;width:20px;height:20px;
+    border-radius:50%;font-size:11px;display:flex;align-items:center;justify-content:center;
+  }
+  .file-drop{
+    border:1.5px dashed rgba(255,255,255,0.25);border-radius:12px;padding:16px;text-align:center;
+    color:var(--muted);font-size:13px;cursor:pointer;
+  }
+  .file-drop:hover{border-color:var(--gold);color:var(--gold-light);}
+  .field-hint{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  .modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
+
+  /* ---------- video ---------- */
+  .video-thumbs{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+  .video-thumb{
+    position:relative;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 10px;border-radius:10px;
+    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);font-size:12.5px;color:var(--text);
+  }
+  .video-thumb .icon{font-size:16px;}
+  .video-thumb .name{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .video-link-input{margin-top:10px;}
+  .clue-video{width:100%;max-width:480px;border-radius:12px;border:1px solid rgba(255,255,255,0.14);margin-bottom:16px;display:block;background:#000;}
+  .video-embed{position:relative;width:100%;max-width:480px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;margin-bottom:16px;border:1px solid rgba(255,255,255,0.14);}
+  .video-embed iframe{width:100%;height:100%;border:0;display:block;}
+  .video-link-btn{margin-bottom:16px;}
+  .video-status{
+    padding:14px;border-radius:10px;background:rgba(255,255,255,0.05);color:var(--muted);
+    font-size:13px;margin-bottom:16px;text-align:center;
+  }
+
+  /* ---------- game over ---------- */
+  .gameover-card{text-align:center;max-width:460px;}
+  .gameover-card .trophy{font-size:56px;margin-bottom:6px;}
+  .gameover-card h2{font-size:30px;color:var(--gold-light);margin-bottom:6px;}
+  .gameover-card .final-scores{display:flex;justify-content:center;gap:16px;margin:22px 0;}
+  .gameover-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+
+  .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:99;}
+  .confetti span{
+    position:absolute;top:-20px;width:9px;height:14px;opacity:0.9;
+    animation:fall linear forwards;border-radius:2px;
+  }
+  @keyframes fall{to{transform:translateY(105vh) rotate(360deg);opacity:0.4;}}
+
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%);
+    background:rgba(20,26,70,0.95);border:1px solid rgba(227,189,84,0.35);color:var(--cream);
+    padding:12px 22px;border-radius:999px;font-size:13.5px;font-weight:600;z-index:200;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  }
+  @media (max-width:900px){
+    .builder-grid,.board{grid-template-columns:repeat(min(3,var(--cat-count,6)),1fr);}
+  }
+  @media (max-width:560px){
+    .builder-grid,.board{grid-template-columns:repeat(min(2,var(--cat-count,6)),1fr);}
+    .hero h1{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script src="example-data.js"></script>
+<script>
+(function(){
+"use strict";
+
+var STORAGE_KEY = "bjeopardy_v1";
+var VALUES = [200,400,600,800,1000];
+var DEFAULT_CATEGORIES = 6;
+var MIN_CATEGORIES = 2;
+var MAX_CATEGORIES = 8;
+
+/* ---------------- persistence ---------------- */
+function normalizeClue(cl){
+  cl.images = cl.images || [];
+  cl.videos = cl.videos || [];
+  cl.videoLink = cl.videoLink || "";
+  return cl;
+}
+function normalizeBoard(board){
+  board.categories.forEach(function(cat){ cat.clues.forEach(normalizeClue); });
+  return board;
+}
+function loadStore(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return {boards:{}, games:{}};
+    var parsed = JSON.parse(raw);
+    if(!parsed.boards) parsed.boards = {};
+    if(!parsed.games) parsed.games = {};
+    Object.values(parsed.boards).forEach(normalizeBoard);
+    return parsed;
+  }catch(e){ return {boards:{}, games:{}}; }
+}
+function saveStore(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }catch(e){
+    showToast("Storage is full — try removing photos or deleting an old board.");
+  }
+}
+
+var store = loadStore();
+var ui = { screen:"home", boardId:null, modal:null };
+
+/* ---------------- helpers ---------------- */
+function uid(prefix){
+  return prefix + "_" + Math.random().toString(36).slice(2,10);
+}
+function escapeHtml(str){
+  return String(str||"").replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function money(v){ return "$" + v; }
+
+function newCategory(){
+  var clues = VALUES.map(function(v){ return {value:v, question:"", answer:"", images:[], videos:[], videoLink:""}; });
+  return {name:"", clues:clues};
+}
+function emptyBoard(){
+  var cats = [];
+  for(var i=0;i<DEFAULT_CATEGORIES;i++){ cats.push(newCategory()); }
+  return {id: uid("b"), title:"", categories: cats};
+}
+function cloneExampleBoard(){
+  var copy = JSON.parse(JSON.stringify(EXAMPLE_BOARD));
+  copy.id = uid("b");
+  return normalizeBoard(copy);
+}
+function newGame(){ return {used:{}, scores:{bride:0}}; }
+function getGame(boardId){
+  if(!store.games[boardId]) store.games[boardId] = newGame();
+  return store.games[boardId];
+}
+function clueKey(catIdx,valIdx){ return catIdx+"-"+valIdx; }
+
+function boardCompletion(board){
+  var total = 0, filled = 0;
+  board.categories.forEach(function(cat){
+    cat.clues.forEach(function(cl){
+      total++;
+      if((cl.question && cl.question.trim()) && (cl.answer && cl.answer.trim() || cl.images.length || cl.videos.length || cl.videoLink)) filled++;
+    });
+  });
+  return {filled:filled, total:total};
+}
+
+function showToast(msg){
+  var root = document.getElementById("toast-root");
+  root.innerHTML = '<div class="toast">'+escapeHtml(msg)+'</div>';
+  setTimeout(function(){ root.innerHTML=""; }, 2600);
+}
+
+/* ---------------- image resize ---------------- */
+function resizeImageFile(file, maxDim, quality){
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var w = img.width, h = img.height;
+        var scale = Math.min(1, maxDim / Math.max(w,h));
+        var cw = Math.round(w*scale), ch = Math.round(h*scale);
+        var canvas = document.createElement("canvas");
+        canvas.width = cw; canvas.height = ch;
+        canvas.getContext("2d").drawImage(img,0,0,cw,ch);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------------- video storage (IndexedDB — localStorage can't hold video-sized blobs) ---------------- */
+var VIDEO_DB_NAME = "bjeopardy_media";
+var VIDEO_STORE = "videos";
+var MAX_VIDEO_BYTES = 150 * 1024 * 1024; // 150MB soft cap per file
+var MAX_IMAGE_BYTES = 20 * 1024 * 1024; // 20MB soft cap on the ORIGINAL photo file, before auto-resize
+function openVideoDB(){
+  return new Promise(function(resolve, reject){
+    var req = indexedDB.open(VIDEO_DB_NAME, 1);
+    req.onupgradeneeded = function(){ req.result.createObjectStore(VIDEO_STORE); };
+    req.onsuccess = function(){ resolve(req.result); };
+    req.onerror = function(){ reject(req.error); };
+  });
+}
+function idbPut(id, blob){
+  return openVideoDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(VIDEO_STORE, "readwrite");
+      tx.objectStore(VIDEO_STORE).put(blob, id);
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  });
+}
+function idbGet(id){
+  return openVideoDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(VIDEO_STORE, "readonly");
+      var req = tx.objectStore(VIDEO_STORE).get(id);
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error); };
+    });
+  });
+}
+function idbDelete(id){
+  return openVideoDB().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(VIDEO_STORE, "readwrite");
+      tx.objectStore(VIDEO_STORE).delete(id);
+      tx.oncomplete = function(){ resolve(); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  });
+}
+
+var videoUrlCache = {}; // id -> objectURL string | "loading" | "error"
+function ensureVideoLoaded(id, onReady){
+  if(videoUrlCache[id] && videoUrlCache[id] !== "loading"){ return; }
+  if(videoUrlCache[id] === "loading") return;
+  videoUrlCache[id] = "loading";
+  idbGet(id).then(function(blob){
+    videoUrlCache[id] = blob ? URL.createObjectURL(blob) : "error";
+    onReady();
+  }).catch(function(){ videoUrlCache[id] = "error"; onReady(); });
+}
+
+function toYouTubeEmbed(url){
+  var m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{6,})/);
+  return m ? "https://www.youtube.com/embed/" + m[1] : null;
+}
+function toVimeoEmbed(url){
+  var m = url.match(/vimeo\.com\/(\d+)/);
+  return m ? "https://player.vimeo.com/video/" + m[1] : null;
+}
+function videoLinkHtml(url){
+  var embed = toYouTubeEmbed(url) || toVimeoEmbed(url);
+  if(embed){
+    return '<div class="video-embed"><iframe src="'+escapeHtml(embed)+'" allow="autoplay; fullscreen" allowfullscreen></iframe></div>';
+  }
+  return '<a class="btn btn-ghost video-link-btn" href="'+escapeHtml(url)+'" target="_blank" rel="noopener noreferrer">▶ Open Video Link</a>';
+}
+function clueVideosHtml(cl){
+  var html = "";
+  cl.videos.forEach(function(v){
+    var cached = videoUrlCache[v.id];
+    if(cached && cached !== "loading" && cached !== "error"){
+      html += '<video class="clue-video" controls src="'+cached+'"></video>';
+    } else if(cached === "error"){
+      html += '<div class="video-status">⚠ Video unavailable (storage may have been cleared)</div>';
+    } else {
+      html += '<div class="video-status">⏳ Loading video…</div>';
+      ensureVideoLoaded(v.id, function(){ renderModal(); });
+    }
+  });
+  if(cl.videoLink && cl.videoLink.trim()){
+    html += videoLinkHtml(cl.videoLink.trim());
+  }
+  return html;
+}
+
+/* ---------------- Excel (.xlsx) import ----------------
+   .xlsx is a ZIP file full of XML. There's no browser-native XLSX reader, so this hand-rolled
+   reader parses just enough of the ZIP + OOXML format to pull out the answer-form sheet, without
+   pulling in a third-party library. It uses the browser's native DecompressionStream for the
+   actual DEFLATE decompression (the one part no vanilla-JS shortcut can replace) and plain
+   regex/string parsing for the XML (skipping DOMParser, which buys nothing here). */
+
+function utf8BytesToString(bytes){
+  var out = "";
+  var i = 0;
+  while(i < bytes.length){
+    var b0 = bytes[i];
+    if(b0 < 0x80){ out += String.fromCharCode(b0); i += 1; }
+    else if((b0 & 0xE0) === 0xC0){
+      out += String.fromCharCode(((b0 & 0x1F) << 6) | (bytes[i+1] & 0x3F));
+      i += 2;
+    } else if((b0 & 0xF0) === 0xE0){
+      out += String.fromCharCode(((b0 & 0x0F) << 12) | ((bytes[i+1] & 0x3F) << 6) | (bytes[i+2] & 0x3F));
+      i += 3;
+    } else if((b0 & 0xF8) === 0xF0){
+      var cp = ((b0 & 0x07) << 18) | ((bytes[i+1] & 0x3F) << 12) | ((bytes[i+2] & 0x3F) << 6) | (bytes[i+3] & 0x3F);
+      cp -= 0x10000;
+      out += String.fromCharCode(0xD800 + (cp >> 10), 0xDC00 + (cp & 0x3FF));
+      i += 4;
+    } else { out += "?"; i += 1; }
+  }
+  return out;
+}
+
+function xmlUnescape(s){
+  return String(s)
+    .replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&apos;/g,"'")
+    .replace(/&#x([0-9a-fA-F]+);/g, function(_,h){ return String.fromCodePoint(parseInt(h,16)); })
+    .replace(/&#(\d+);/g, function(_,d){ return String.fromCodePoint(parseInt(d,10)); })
+    .replace(/&amp;/g,"&");
+}
+
+function findZipEOCD(bytes){
+  var sig = 0x06054b50;
+  var view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  var minPos = Math.max(0, bytes.length - 66000);
+  for(var i = bytes.length - 22; i >= minPos; i--){
+    if(view.getUint32(i, true) === sig) return i;
+  }
+  return -1;
+}
+
+function parseZipEntries(bytes){
+  var view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  var eocd = findZipEOCD(bytes);
+  if(eocd === -1) throw new Error("Not a valid .xlsx/.zip file (no End Of Central Directory found)");
+  var entryCount = view.getUint16(eocd + 10, true);
+  var cdOffset = view.getUint32(eocd + 16, true);
+
+  var entries = {};
+  var pos = cdOffset;
+  for(var i = 0; i < entryCount; i++){
+    if(view.getUint32(pos, true) !== 0x02014b50) throw new Error("Corrupt zip central directory");
+    var compMethod = view.getUint16(pos + 10, true);
+    var compSize = view.getUint32(pos + 20, true);
+    var nameLen = view.getUint16(pos + 28, true);
+    var extraLen = view.getUint16(pos + 30, true);
+    var commentLen = view.getUint16(pos + 32, true);
+    var localHeaderOffset = view.getUint32(pos + 42, true);
+    var name = utf8BytesToString(bytes.subarray(pos + 46, pos + 46 + nameLen));
+    entries[name] = { compMethod: compMethod, compSize: compSize, localHeaderOffset: localHeaderOffset };
+    pos += 46 + nameLen + extraLen + commentLen;
+  }
+  return entries;
+}
+
+function extractZipEntry(bytes, entry){
+  var view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  var pos = entry.localHeaderOffset;
+  if(view.getUint32(pos, true) !== 0x04034b50) throw new Error("Corrupt zip local file header");
+  var nameLen = view.getUint16(pos + 26, true);
+  var extraLen = view.getUint16(pos + 28, true);
+  var dataStart = pos + 30 + nameLen + extraLen;
+  var compData = bytes.subarray(dataStart, dataStart + entry.compSize);
+  if(entry.compMethod === 0){
+    return Promise.resolve(compData);
+  }
+  if(entry.compMethod === 8){
+    var stream = new Blob([compData]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Response(stream).arrayBuffer().then(function(buf){ return new Uint8Array(buf); });
+  }
+  return Promise.reject(new Error("Unsupported zip compression method: " + entry.compMethod));
+}
+
+function parseSharedStrings(xml){
+  var strings = [];
+  var siRe = /<si>([\s\S]*?)<\/si>/g;
+  var tRe = /<t[^>]*>([\s\S]*?)<\/t>/g;
+  var m;
+  while((m = siRe.exec(xml))){
+    var text = "", tm;
+    tRe.lastIndex = 0;
+    while((tm = tRe.exec(m[1]))){ text += tm[1]; }
+    strings.push(xmlUnescape(text));
+  }
+  return strings;
+}
+
+function parseTagAttrs(attrString, names){
+  var out = {};
+  names.forEach(function(n){
+    var m = attrString.match(new RegExp(n + '="([^"]*)"'));
+    out[n] = m ? m[1] : "";
+  });
+  return out;
+}
+
+function parseWorkbookSheets(xml){
+  var sheets = [];
+  var re = /<sheet\b([^>]*)\/?>/g;
+  var m;
+  while((m = re.exec(xml))){
+    var a = parseTagAttrs(m[1], ["name", "r:id"]);
+    if(a.name) sheets.push({ name: xmlUnescape(a.name), rid: a["r:id"] });
+  }
+  return sheets;
+}
+
+function parseWorkbookRels(xml){
+  var map = {};
+  var re = /<Relationship\b([^>]*)\/?>/g;
+  var m;
+  while((m = re.exec(xml))){
+    var a = parseTagAttrs(m[1], ["Id", "Target"]);
+    if(a.Id) map[a.Id] = a.Target;
+  }
+  return map;
+}
+function resolveRelTarget(target){
+  return target.charAt(0) === "/" ? target.slice(1) : "xl/" + target;
+}
+
+function parseSheetRows(xml, sharedStrings){
+  var rows = {};
+  var rowRe = /<row\b([^>]*)>([\s\S]*?)<\/row>/g;
+  var cellRe = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g;
+  var rm;
+  while((rm = rowRe.exec(xml))){
+    var rowAttrs = parseTagAttrs(rm[1], ["r"]);
+    if(!rowAttrs.r) continue;
+    var rowData = {};
+    cellRe.lastIndex = 0;
+    var cm;
+    while((cm = cellRe.exec(rm[2]))){
+      var attrs = cm[1], inner = cm[2] || "";
+      var refMatch = attrs.match(/r="([A-Z]+)\d+"/);
+      if(!refMatch) continue;
+      var col = refMatch[1];
+      var typeMatch = attrs.match(/t="([^"]+)"/);
+      var type = typeMatch ? typeMatch[1] : "n";
+      var value = "";
+      if(type === "s"){
+        var vMatch = inner.match(/<v>([\s\S]*?)<\/v>/);
+        var idx = vMatch ? parseInt(vMatch[1], 10) : -1;
+        value = sharedStrings[idx] !== undefined ? sharedStrings[idx] : "";
+      } else if(type === "inlineStr"){
+        var isMatch = inner.match(/<is>([\s\S]*?)<\/is>/);
+        if(isMatch){
+          var tMatches = isMatch[1].match(/<t[^>]*>([\s\S]*?)<\/t>/g) || [];
+          value = xmlUnescape(tMatches.map(function(t){ return t.replace(/<t[^>]*>/, "").replace(/<\/t>/, ""); }).join(""));
+        }
+      } else if(type === "str"){
+        var vMatch2 = inner.match(/<v>([\s\S]*?)<\/v>/);
+        value = vMatch2 ? xmlUnescape(vMatch2[1]) : "";
+      } else {
+        var vMatch3 = inner.match(/<v>([\s\S]*?)<\/v>/);
+        value = vMatch3 ? vMatch3[1] : "";
+      }
+      rowData[col] = value;
+    }
+    rows[parseInt(rowAttrs.r, 10)] = rowData;
+  }
+  return rows;
+}
+
+function readZipEntryText(bytes, entries, path){
+  var entry = entries[path];
+  if(!entry) return Promise.resolve(null);
+  return extractZipEntry(bytes, entry).then(function(u8){ return utf8BytesToString(u8); });
+}
+
+function parseXlsxFile(arrayBuffer){
+  var bytes = new Uint8Array(arrayBuffer);
+  var entries = parseZipEntries(bytes);
+
+  if(!entries["xl/workbook.xml"]){
+    var looksLikeNumbers = Object.keys(entries).some(function(name){
+      return /\.iwa$/i.test(name) || name.indexOf("Index/Document") === 0;
+    });
+    if(looksLikeNumbers){
+      var err = new Error("This is an Apple Numbers file, not an Excel file.");
+      err.isNumbersFile = true;
+      throw err;
+    }
+  }
+
+  return Promise.all([
+    readZipEntryText(bytes, entries, "xl/workbook.xml"),
+    readZipEntryText(bytes, entries, "xl/_rels/workbook.xml.rels"),
+    readZipEntryText(bytes, entries, "xl/sharedStrings.xml"),
+  ]).then(function(results){
+    var workbookXml = results[0], relsXml = results[1], sstXml = results[2];
+    if(!workbookXml) throw new Error("This doesn't look like a valid .xlsx file.");
+    var sharedStrings = sstXml ? parseSharedStrings(sstXml) : [];
+    var sheetsMeta = parseWorkbookSheets(workbookXml);
+    var relsMap = relsXml ? parseWorkbookRels(relsXml) : {};
+
+    function pathFor(sheetMeta){
+      var target = relsMap[sheetMeta.rid];
+      return target ? resolveRelTarget(target) : null;
+    }
+
+    var named = sheetsMeta.filter(function(s){ return s.name.trim().toLowerCase() === "jeopardy board"; })[0];
+    if(named){
+      var path = pathFor(named);
+      return readZipEntryText(bytes, entries, path).then(function(xml){
+        if(!xml) throw new Error('Could not find the "Jeopardy Board" sheet inside this file.');
+        return parseSheetRows(xml, sharedStrings);
+      });
+    }
+    // fallback: no sheet named exactly "Jeopardy Board" -- use whichever sheet has the most rows
+    return Promise.all(sheetsMeta.map(function(s){
+      var p = pathFor(s);
+      return p ? readZipEntryText(bytes, entries, p) : Promise.resolve(null);
+    })).then(function(xmls){
+      var best = null, bestCount = -1;
+      xmls.forEach(function(xml){
+        if(!xml) return;
+        var rows = parseSheetRows(xml, sharedStrings);
+        var count = Object.keys(rows).length;
+        if(count > bestCount){ bestCount = count; best = rows; }
+      });
+      if(!best) throw new Error("Couldn't find any usable data in this Excel file.");
+      return best;
+    });
+  });
+}
+
+function buildBoardFromRows(rowsByNumber, titleGuess){
+  var rowNums = Object.keys(rowsByNumber).map(Number).sort(function(a,b){ return a-b; });
+  var categoriesOrder = [];
+  var categoriesMap = {};
+
+  rowNums.forEach(function(n){
+    var r = rowsByNumber[n];
+    var catName = (r.A || "").toString().trim();
+    if(!catName || catName.toLowerCase() === "category") return; // skip blanks + header row
+    var val = parseInt(r.B, 10);
+    if(VALUES.indexOf(val) === -1) return; // skip rows without a standard point value
+    var question = (r.C || "").toString().trim();
+    var answer = (r.D || "").toString().trim();
+
+    if(!categoriesMap[catName]){
+      categoriesMap[catName] = { name: catName, cluesByValue: {} };
+      categoriesOrder.push(catName);
+    }
+    if(!(val in categoriesMap[catName].cluesByValue)){
+      categoriesMap[catName].cluesByValue[val] = { value: val, question: question, answer: answer, images: [], videos: [], videoLink: "" };
+    }
+  });
+
+  var usedNames = categoriesOrder.slice(0, MAX_CATEGORIES);
+  var droppedCount = categoriesOrder.length - usedNames.length;
+  var categories = usedNames.map(function(name){
+    var cat = categoriesMap[name];
+    var clues = VALUES.map(function(v){
+      return cat.cluesByValue[v] || { value: v, question: "", answer: "", images: [], videos: [], videoLink: "" };
+    });
+    return { name: name, clues: clues };
+  });
+  while(categories.length < MIN_CATEGORIES){ categories.push(newCategory()); }
+
+  return {
+    id: uid("b"),
+    title: titleGuess || "Imported Board",
+    categories: categories,
+    _droppedCategories: droppedCount,
+  };
+}
+
+/* ================= RENDER ROOT ================= */
+function render(){
+  var app = document.getElementById("app");
+  if(ui.screen === "home") app.innerHTML = renderHome();
+  else if(ui.screen === "builder") app.innerHTML = renderBuilder();
+  else if(ui.screen === "play") app.innerHTML = renderPlay();
+  renderModal();
+}
+
+/* ================= HOME ================= */
+function renderHome(){
+  var boards = Object.values(store.boards).sort(function(a,b){ return (b._updated||0)-(a._updated||0); });
+  var cardsHtml = boards.length ? boards.map(function(b){
+    var c = boardCompletion(b);
+    var game = store.games[b.id];
+    var played = game && Object.keys(game.used).length > 0;
+    return (
+      '<div class="board-card">'+
+        '<div class="progress-pill">'+c.filled+' / '+c.total+' clues filled</div>'+
+        '<h3>'+escapeHtml(b.title||"Untitled Board")+'</h3>'+
+        '<div class="meta">'+(played ? ("In progress — Bride "+money(game.scores.bride)) : "Not played yet")+'</div>'+
+        '<div class="card-actions">'+
+          '<button class="btn btn-primary btn-sm" onclick="App.goPlay(\''+b.id+'\')">▶ Play</button>'+
+          '<button class="btn btn-ghost btn-sm" onclick="App.goBuilder(\''+b.id+'\')">✎ Edit</button>'+
+          '<button class="btn btn-ghost btn-sm" onclick="App.duplicateBoard(\''+b.id+'\')">⧉ Duplicate</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="App.deleteBoard(\''+b.id+'\')">🗑 Delete</button>'+
+        '</div>'+
+      '</div>'
+    );
+  }).join("") : '<div class="empty-state">No boards yet — create one, or try the example to see how it plays.</div>';
+
+  return (
+    '<div class="hero">'+
+      '<div class="eyebrow">DIY GAME NIGHT</div>'+
+      '<h1>💍 Bachelorette <span>Jeopardy</span></h1>'+
+      '<p>Build the categories and clues once. Play it live and always know exactly which clues have been picked — no more re-explaining the PowerPoint.</p>'+
+      '<div class="hero-actions">'+
+        '<button class="btn btn-primary" onclick="App.createBoard()">+ Create New Board</button>'+
+        '<button class="btn btn-ghost" onclick="App.loadExample()">✨ Try the Example Board (Jack &amp; Jill)</button>'+
+        '<button class="btn btn-ghost" onclick="App.downloadAnswerForm()">⬇ Download Answer Form</button>'+
+        '<button class="btn btn-ghost" onclick="document.getElementById(\'excel-import-input\').click()">📄 Import Jeopardy Answers</button>'+
+        '<button class="btn btn-ghost" onclick="App.showFaq()">❓ FAQ</button>'+
+        '<input type="file" id="excel-import-input" accept=".xlsx" style="display:none" onchange="App.importExcel(event)">'+
+      '</div>'+
+    '</div>'+
+    '<div class="section-title"><h2>Your Boards</h2></div>'+
+    '<div class="board-grid-list">'+cardsHtml+'</div>'
+  );
+}
+
+/* ================= BUILDER ================= */
+function renderBuilder(){
+  var board = store.boards[ui.boardId];
+  if(!board){ ui.screen="home"; return renderHome(); }
+
+  var canRemove = board.categories.length > MIN_CATEGORIES;
+  var catHeaders = board.categories.map(function(cat, ci){
+    return '<div class="cat-head">'+
+      '<input type="text" placeholder="Category '+(ci+1)+'" value="'+escapeHtml(cat.name)+'" oninput="App.setCategoryName('+ci+', this.value)">'+
+      (canRemove ? '<button class="cat-remove" title="Remove category" onclick="App.removeCategory('+ci+')">✕</button>' : "")+
+    '</div>';
+  }).join("");
+
+  var clueRows = VALUES.map(function(val, vi){
+    return board.categories.map(function(cat, ci){
+      var cl = cat.clues[vi];
+      var filled = cl.question.trim() && (cl.answer.trim() || cl.images.length || cl.videos.length || cl.videoLink);
+      var snippet = cl.question.trim() ? escapeHtml(cl.question.slice(0,40)) : "Click to add";
+      return '<div class="clue-cell'+(filled?" filled":"")+'" onclick="App.editClue('+ci+','+vi+')">'+
+        '<div class="val">'+money(val)+'</div>'+
+        '<div class="snippet">'+snippet+'</div>'+
+      '</div>';
+    }).join("");
+  }).join("");
+
+  var grid = '<div class="builder-grid" style="--cat-count:'+board.categories.length+'">'+catHeaders+clueRows+'</div>';
+
+  var categoriesBar = (
+    '<div class="categories-bar">'+
+      '<div class="count">'+board.categories.length+' of '+MAX_CATEGORIES+' categories</div>'+
+      (board.categories.length < MAX_CATEGORIES ? '<button class="btn btn-ghost btn-sm" onclick="App.addCategory()">+ Add Category</button>' : "")+
+    '</div>'
+  );
+
+  return (
+    '<div class="topbar">'+
+      '<div class="topbar-left">'+
+        '<button class="btn btn-ghost btn-sm" onclick="App.goHome()">← Home</button>'+
+        '<input type="text" class="title-input" placeholder="Board title (e.g. Lucy\'s Bachelorette Jeopardy)" value="'+escapeHtml(board.title)+'" oninput="App.setBoardTitle(this.value)">'+
+      '</div>'+
+      '<div class="topbar-actions">'+
+        '<button class="btn btn-primary" onclick="App.goPlay(\''+board.id+'\')">▶ Save &amp; Play</button>'+
+      '</div>'+
+    '</div>'+
+    categoriesBar+
+    grid
+  );
+}
+
+/* ================= PLAY ================= */
+function renderPlay(){
+  var board = store.boards[ui.boardId];
+  if(!board){ ui.screen="home"; return renderHome(); }
+  var game = getGame(board.id);
+
+  var headers = board.categories.map(function(cat, ci){
+    return '<div class="cat-header">'+escapeHtml(cat.name || ("Category "+(ci+1)))+'</div>';
+  }).join("");
+
+  var rows = VALUES.map(function(val, vi){
+    return board.categories.map(function(cat, ci){
+      var key = clueKey(ci,vi);
+      var used = game.used[key];
+      var badge = "";
+      if(used) badge = used.by === "bride" ? "👰" : "➖";
+      return '<div class="tile'+(used?" used":"")+'" onclick="App.openClue('+ci+','+vi+')">'+
+        (used ? "" : money(val)) +
+        (used ? '<span class="badge">'+badge+'</span>' : "") +
+      '</div>';
+    }).join("");
+  }).join("");
+
+  var totalUsed = Object.keys(game.used).length;
+  var totalClues = board.categories.length * VALUES.length;
+
+  return (
+    '<div class="topbar">'+
+      '<div class="topbar-left">'+
+        '<button class="btn btn-ghost btn-sm" onclick="App.goHome()">← Home</button>'+
+        '<h1 style="font-size:22px;color:var(--cream);">'+escapeHtml(board.title||"Untitled Board")+'</h1>'+
+      '</div>'+
+      '<div class="topbar-actions" style="align-items:center;">'+
+        '<div class="scoreboard">'+
+          '<div class="score-chip bride">👰 Bride <span class="amt">'+money(game.scores.bride)+'</span></div>'+
+        '</div>'+
+        '<button class="btn btn-ghost btn-sm" onclick="App.goBuilder(\''+board.id+'\')">✎ Edit</button>'+
+        '<button class="btn btn-ghost btn-sm" onclick="App.confirmResetGame(\''+board.id+'\')">↺ Reset Game</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="App.endGame()">🏁 End Game</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="board" style="--cat-count:'+board.categories.length+'">'+headers+rows+'</div>'+
+    '<div style="text-align:center;color:var(--muted);font-size:12.5px;margin-top:18px;">'+totalUsed+' of '+totalClues+' clues played</div>'
+  );
+}
+
+/* ================= MODAL ================= */
+function renderModal(){
+  var root = document.getElementById("modal-root");
+  if(!ui.modal){ root.innerHTML=""; return; }
+
+  if(ui.modal.type === "clue-editor") root.innerHTML = renderClueEditor();
+  else if(ui.modal.type === "play-clue") root.innerHTML = renderPlayClue();
+  else if(ui.modal.type === "game-over") root.innerHTML = renderGameOver();
+  else if(ui.modal.type === "faq") root.innerHTML = renderFaq();
+  else root.innerHTML = "";
+}
+
+function renderFaq(){
+  var faqs = [
+    {
+      q: "How do I add photos or videos to a clue?",
+      a: "Open a board in the Builder, click any clue tile, and use the Photos and Video fields near the bottom of the editor. You can upload photo files, upload a video file, and/or paste a video link (YouTube, Vimeo, Google Drive, Dropbox, etc.) — any combination is fine."
+    },
+    {
+      q: "Is there a size limit on photos or videos?",
+      a: "Photos: max 20MB per original file, and they're automatically resized/compressed after upload so they don't take up much space. Videos: max 150MB per file. Video links (YouTube/Vimeo/etc.) have no size limit since the video itself lives on that service, not in this app."
+    },
+    {
+      q: "Where are my photos and videos actually stored? Is it private?",
+      a: "Everything — board content, photos, and videos — is stored only in your browser, on your device. Nothing is uploaded to a server. That also means a board only exists on the device/browser that created it, and videos specifically only play back on that same device/browser (photos and text carry over fine if you export/import via Excel, but uploaded video files do not)."
+    },
+    {
+      q: "How does importing Excel answers work?",
+      a: "1) Click \"⬇ Download Answer Form\" on the Home screen. 2) Edit the Category/Question columns as you like. 3) Send it to whoever's answering (e.g. the fiancé) and have them fill in ONLY the Answer column. 4) Once you get it back, click \"📄 Import Jeopardy Answers\" on the Home screen and select that exact file — it'll build a new board automatically and drop you into the Builder to review before playing."
+    },
+    {
+      q: "I can't upload my file — what's wrong?",
+      a: "A few common causes: (1) It's actually an Apple Numbers file — if it was ever opened/saved in Numbers, Numbers silently converts it to its own format even if it's still named \".xlsx\". Fix: open it in Numbers, go to File → Export To → Excel, and upload that exported copy instead. (2) It's the wrong file type entirely — this only accepts real .xlsx files, not .csv, .numbers, .pdf, or a screenshot/photo of the spreadsheet. (3) The structure was changed — don't rename the \"Jeopardy Board\" tab or reorder/rename the Category, Point Value, Question, Answer columns; adding or editing rows is fine, restructuring the columns isn't. If you're stuck, the safest fix is to download a fresh template and copy the answers into it rather than troubleshooting a file that's been edited many times."
+    },
+    {
+      q: "What happens if some clues are left blank?",
+      a: "Nothing breaks — a blank clue just shows a friendly placeholder during play instead of a question, and it's still fully clickable and scoreable. You don't need to fill in every single clue before playing."
+    },
+    {
+      q: "Can I use this on more than one device at once?",
+      a: "Not for a single live game — since everything is stored locally, a board only lives on the device that created it. To move a board between devices, use the Excel import/export workflow above, or just play the whole game from one host device/browser (e.g. a laptop connected to a TV)."
+    },
+  ];
+
+  var body = faqs.map(function(item){
+    return '<div class="faq-item"><div class="faq-q">'+escapeHtml(item.q)+'</div><div class="faq-a">'+escapeHtml(item.a)+'</div></div>';
+  }).join("");
+
+  return (
+    '<div class="modal-overlay" onclick="if(event.target===this) App.closeModal()">'+
+      '<div class="modal-card" style="max-width:600px;">'+
+        '<div class="modal-close" onclick="App.closeModal()">✕</div>'+
+        '<h2 style="color:var(--cream);font-size:24px;margin-bottom:18px;">❓ FAQ</h2>'+
+        body+
+        '<div class="modal-footer">'+
+          '<button class="btn btn-primary" onclick="App.closeModal()">Close</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function renderClueEditor(){
+  var board = store.boards[ui.boardId];
+  var m = ui.modal;
+  var cl = board.categories[m.catIdx].clues[m.valIdx];
+  var catName = board.categories[m.catIdx].name || ("Category "+(m.catIdx+1));
+
+  var thumbs = cl.images.map(function(img, ii){
+    return '<div class="thumb"><img src="'+img+'"><div class="rm" onclick="App.removeClueImage('+ii+')">✕</div></div>';
+  }).join("");
+
+  var videoThumbs = cl.videos.map(function(v, vi){
+    return '<div class="video-thumb"><span class="icon">🎬</span><span class="name">'+escapeHtml(v.name||"video")+'</span><div class="rm" onclick="App.removeClueVideo('+vi+')">✕</div></div>';
+  }).join("");
+
+  return (
+    '<div class="modal-overlay" onclick="if(event.target===this) App.closeModal()">'+
+      '<div class="modal-card">'+
+        '<div class="modal-close" onclick="App.closeModal()">✕</div>'+
+        '<div class="clue-pill">'+escapeHtml(catName)+' · '+money(cl.value)+'</div>'+
+        '<div class="field"><label>Question (shown first)</label>'+
+          '<textarea rows="2" oninput="App.setClueField(\'question\', this.value)" placeholder="e.g. Where was your first kiss?">'+escapeHtml(cl.question)+'</textarea>'+
+        '</div>'+
+        '<div class="field"><label>Answer (revealed after)</label>'+
+          '<textarea rows="3" oninput="App.setClueField(\'answer\', this.value)" placeholder="e.g. Monroe\'s Bar">'+escapeHtml(cl.answer)+'</textarea>'+
+        '</div>'+
+        '<div class="field"><label>Photos (optional, shown with the answer)</label>'+
+          '<div class="file-drop" onclick="document.getElementById(\'clue-img-input\').click()">📷 Click to add photo(s)</div>'+
+          '<div class="field-hint">Max 20MB per photo — automatically resized after upload</div>'+
+          '<input type="file" id="clue-img-input" accept="image/*" multiple style="display:none" onchange="App.addClueImages(event)">'+
+          (thumbs ? '<div class="thumbs">'+thumbs+'</div>' : "")+
+        '</div>'+
+        '<div class="field"><label>Video (optional, shown with the answer) — upload a clip, or paste a link</label>'+
+          '<div class="file-drop" onclick="document.getElementById(\'clue-video-input\').click()">🎬 Click to upload a video file</div>'+
+          '<div class="field-hint">Max 150MB per video — stored on this device/browser only</div>'+
+          '<input type="file" id="clue-video-input" accept="video/*" multiple style="display:none" onchange="App.addClueVideos(event)">'+
+          (videoThumbs ? '<div class="video-thumbs">'+videoThumbs+'</div>' : "")+
+          '<input type="text" class="video-link-input" placeholder="Or paste a video link (YouTube, Google Drive, Dropbox...)" value="'+escapeHtml(cl.videoLink)+'" oninput="App.setClueField(\'videoLink\', this.value)">'+
+        '</div>'+
+        '<div class="modal-footer">'+
+          '<button class="btn btn-primary" onclick="App.closeModal()">Done</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function renderPlayClue(){
+  var board = store.boards[ui.boardId];
+  var m = ui.modal;
+  var cl = board.categories[m.catIdx].clues[m.valIdx];
+  var catName = board.categories[m.catIdx].name || ("Category "+(m.catIdx+1));
+  var key = clueKey(m.catIdx, m.valIdx);
+  var game = getGame(board.id);
+  var used = game.used[key];
+
+  var imagesHtml = cl.images && cl.images.length ? '<div class="clue-images">'+cl.images.map(function(i){ return '<img src="'+i+'">'; }).join("")+'</div>' : "";
+  var videosHtml = (used || m.phase === "bride") ? clueVideosHtml(cl) : "";
+  var questionText = cl.question.trim() ? escapeHtml(cl.question) : "(No question written for this clue — click Edit on the builder to add one.)";
+  var answerText = cl.answer.trim() ? escapeHtml(cl.answer) : (cl.images.length || cl.videos.length || cl.videoLink ? "" : "(No answer written for this clue.)");
+
+  var body = "";
+
+  if(used){
+    var byLabel = used.by === "bride" ? "👰 The Bride got it" : "➖ The Bride missed it";
+    body = (
+      '<div class="clue-question">'+questionText+'</div>'+
+      '<div class="clue-answer">'+answerText+'</div>'+
+      videosHtml+
+      imagesHtml+
+      '<div class="modal-label">Result</div>'+
+      '<div class="clue-answer" style="margin-bottom:0;">'+byLabel+'</div>'+
+      '<div class="modal-footer">'+
+        '<button class="btn btn-ghost" onclick="App.undoScore()">↺ Undo this result</button>'+
+        '<button class="btn btn-primary" onclick="App.closeModal()">Close</button>'+
+      '</div>'
+    );
+  } else if(m.phase === "question"){
+    body = (
+      '<div class="clue-question">'+questionText+'</div>'+
+      '<div class="modal-footer">'+
+        '<button class="btn btn-primary" onclick="App.revealAnswer()">Reveal Answer →</button>'+
+      '</div>'
+    );
+  } else if(m.phase === "bride"){
+    body = (
+      '<div class="clue-question">'+questionText+'</div>'+
+      '<div class="clue-answer">'+answerText+'</div>'+
+      videosHtml+
+      imagesHtml+
+      '<div class="modal-label">Did the Bride get it?</div>'+
+      '<div class="score-row">'+
+        '<button class="btn btn-bride" onclick="App.scoreClue(\'bride\')">👰 Bride Got It (+'+money(cl.value)+')</button>'+
+        '<button class="btn btn-ghost" onclick="App.scoreClue(\'none\')">❌ Bride Missed It</button>'+
+      '</div>'
+    );
+  }
+
+  return (
+    '<div class="modal-overlay">'+
+      '<div class="modal-card">'+
+        (used ? '<div class="modal-close" onclick="App.closeModal()">✕</div>' : '')+
+        '<div class="clue-pill">'+escapeHtml(catName)+' · '+money(cl.value)+'</div>'+
+        body+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function renderGameOver(){
+  var board = store.boards[ui.boardId];
+  var game = getGame(board.id);
+  var b = game.scores.bride;
+  var totalPossible = VALUES.reduce(function(s,v){return s+v;},0) * board.categories.length;
+  var pct = totalPossible ? b / totalPossible : 0;
+  var headline = pct >= 0.8 ? "👰 She Knows Him So Well!" : pct >= 0.4 ? "👰 Not Bad, Bride!" : "👰 Time For Date Night!";
+
+  var colors = ["#e3bd54","#ff6fa5","#f6e3a1","#3fbd7a"];
+  var pieces = "";
+  for(var i=0;i<70;i++){
+    var left = Math.random()*100;
+    var delay = Math.random()*1.2;
+    var dur = 2.4 + Math.random()*1.8;
+    var color = colors[i % colors.length];
+    pieces += '<span style="left:'+left+'%;background:'+color+';animation-duration:'+dur+'s;animation-delay:'+delay+'s;"></span>';
+  }
+
+  return (
+    '<div class="confetti">'+pieces+'</div>'+
+    '<div class="modal-overlay">'+
+      '<div class="modal-card gameover-card">'+
+        '<div class="trophy">🏆</div>'+
+        '<h2>'+headline+'</h2>'+
+        '<div class="final-scores">'+
+          '<div class="score-chip bride">👰 Bride\'s Final Score <span class="amt">'+money(b)+'</span></div>'+
+        '</div>'+
+        '<div class="gameover-actions">'+
+          '<button class="btn btn-primary" onclick="App.playAgain()">↺ Play Again</button>'+
+          '<button class="btn btn-ghost" onclick="App.goHome()">🏠 Back to Home</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+/* ---------------- embedded answer-form template (base64 .xlsx, ~9.7KB) ---------------- */
+/* Keeping this inline (rather than a sibling file) means the Download button works even if
+   someone only forwards the single HTML file, matching how example-data.js is handled separately
+   only because that one is far larger. */
+var ANSWER_FORM_XLSX_BASE64 = "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";
+function base64ToUint8Array(b64){
+  var binary = atob(b64);
+  var bytes = new Uint8Array(binary.length);
+  for(var i=0;i<binary.length;i++){ bytes[i] = binary.charCodeAt(i); }
+  return bytes;
+}
+
+/* ================= ACTIONS ================= */
+var App = {};
+
+App.createBoard = function(){
+  var b = emptyBoard();
+  b._updated = Date.now();
+  store.boards[b.id] = b;
+  saveStore();
+  ui.boardId = b.id; ui.screen = "builder"; ui.modal=null;
+  render();
+};
+
+App.loadExample = function(){
+  var b = cloneExampleBoard();
+  b._updated = Date.now();
+  store.boards[b.id] = b;
+  saveStore();
+  ui.boardId = b.id; ui.screen = "play"; ui.modal=null;
+  render();
+  showToast("Loaded the example board — click any tile to play!");
+};
+
+App.downloadAnswerForm = function(){
+  var bytes = base64ToUint8Array(ANSWER_FORM_XLSX_BASE64);
+  var blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = "Jeopardy Answer Form.xlsx";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+App.importExcel = function(evt){
+  var file = evt.target.files[0];
+  evt.target.value = "";
+  if(!file) return;
+  if(typeof DecompressionStream === "undefined"){
+    showToast("Your browser can't read Excel files yet — try the latest Chrome, Edge, Firefox, or Safari.");
+    return;
+  }
+  file.arrayBuffer().then(function(buf){
+    return parseXlsxFile(buf);
+  }).then(function(rows){
+    var titleGuess = file.name.replace(/\.xlsx$/i, "").trim();
+    var board = buildBoardFromRows(rows, titleGuess);
+    normalizeBoard(board);
+    board._updated = Date.now();
+    store.boards[board.id] = board;
+    saveStore();
+    ui.boardId = board.id; ui.screen = "builder"; ui.modal = null;
+    render();
+    var filled = 0, total = 0;
+    board.categories.forEach(function(cat){ cat.clues.forEach(function(cl){ total++; if(cl.question) filled++; }); });
+    var msg = "Imported " + board.categories.length + " categories, " + filled + " of " + total + " clues filled in.";
+    if(board._droppedCategories > 0) msg += " (" + board._droppedCategories + " extra categories beyond the max of " + MAX_CATEGORIES + " were skipped.)";
+    showToast(msg);
+  }).catch(function(err){
+    if(err && err.isNumbersFile){
+      showToast("This looks like an Apple Numbers file — in Numbers, go to File → Export To → Excel, then upload that file instead.");
+    } else {
+      showToast("Couldn't read that file — make sure it's the unmodified .xlsx you downloaded (not converted, renamed, or a screenshot).");
+    }
+  });
+};
+
+App.goHome = function(){ ui.screen="home"; ui.modal=null; render(); };
+App.goBuilder = function(id){ ui.boardId=id; ui.screen="builder"; ui.modal=null; render(); };
+App.goPlay = function(id){
+  ui.boardId=id; ui.screen="play"; ui.modal=null; render();
+};
+
+App.duplicateBoard = function(id){
+  var copy = JSON.parse(JSON.stringify(store.boards[id]));
+  copy.id = uid("b");
+  copy.title = copy.title + " (copy)";
+  copy._updated = Date.now();
+  // videos are stored separately in IndexedDB by id — give the copy its own blobs
+  // so deleting a video on one board never affects the other.
+  var videoCopies = [];
+  copy.categories.forEach(function(cat){
+    cat.clues.forEach(function(cl){
+      cl.videos.forEach(function(v){
+        var oldId = v.id, newId = uid("vid");
+        videoCopies.push(idbGet(oldId).then(function(blob){ return blob ? idbPut(newId, blob) : null; }));
+        v.id = newId;
+      });
+    });
+  });
+  store.boards[copy.id] = copy;
+  saveStore(); render();
+  Promise.all(videoCopies).catch(function(){ showToast("Some videos couldn't be duplicated."); });
+};
+
+App.deleteBoard = function(id){
+  var board = store.boards[id];
+  if(!confirm('Delete "'+(board.title||"Untitled Board")+'"? This cannot be undone.')) return;
+  board.categories.forEach(function(cat){
+    cat.clues.forEach(function(cl){ cl.videos.forEach(function(v){ idbDelete(v.id); }); });
+  });
+  delete store.boards[id];
+  delete store.games[id];
+  saveStore(); render();
+};
+
+App.setBoardTitle = function(val){
+  store.boards[ui.boardId].title = val;
+  store.boards[ui.boardId]._updated = Date.now();
+  saveStore();
+};
+App.setCategoryName = function(ci, val){
+  store.boards[ui.boardId].categories[ci].name = val;
+  store.boards[ui.boardId]._updated = Date.now();
+  saveStore();
+};
+App.addCategory = function(){
+  var board = store.boards[ui.boardId];
+  if(board.categories.length >= MAX_CATEGORIES) return;
+  board.categories.push(newCategory());
+  board._updated = Date.now();
+  saveStore();
+  render();
+};
+App.removeCategory = function(ci){
+  var board = store.boards[ui.boardId];
+  if(board.categories.length <= MIN_CATEGORIES) return;
+  var name = board.categories[ci].name || ("Category "+(ci+1));
+  if(!confirm('Remove "'+name+'" and all of its clues? This cannot be undone.')) return;
+  board.categories.splice(ci,1);
+  board._updated = Date.now();
+  // clue indices shift after a removal, so any in-progress game for this board is no longer valid
+  if(store.games[board.id] && Object.keys(store.games[board.id].used).length){
+    store.games[board.id] = newGame();
+    showToast("Category removed — game progress was reset.");
+  }
+  saveStore();
+  render();
+};
+
+App.editClue = function(ci, vi){
+  ui.modal = {type:"clue-editor", catIdx:ci, valIdx:vi};
+  renderModal();
+};
+App.setClueField = function(field, val){
+  var m = ui.modal;
+  store.boards[ui.boardId].categories[m.catIdx].clues[m.valIdx][field] = val;
+  store.boards[ui.boardId]._updated = Date.now();
+  saveStore();
+};
+App.addClueImages = function(evt){
+  var files = Array.from(evt.target.files || []);
+  var m = ui.modal;
+  var clue = store.boards[ui.boardId].categories[m.catIdx].clues[m.valIdx];
+  var tooBig = files.filter(function(f){ return f.size > MAX_IMAGE_BYTES; });
+  var okFiles = files.filter(function(f){ return f.size <= MAX_IMAGE_BYTES; });
+  if(tooBig.length) showToast("Skipped a photo over 20MB — try a smaller file.");
+  Promise.all(okFiles.map(function(f){ return resizeImageFile(f, 900, 0.72); }))
+    .then(function(dataUrls){
+      dataUrls.forEach(function(u){ clue.images.push(u); });
+      saveStore();
+      renderModal();
+    })
+    .catch(function(){ showToast("Couldn't read that image."); });
+  evt.target.value = "";
+};
+App.removeClueImage = function(idx){
+  var m = ui.modal;
+  var clue = store.boards[ui.boardId].categories[m.catIdx].clues[m.valIdx];
+  clue.images.splice(idx,1);
+  saveStore();
+  renderModal();
+};
+App.addClueVideos = function(evt){
+  var files = Array.from(evt.target.files || []);
+  var m = ui.modal;
+  var clue = store.boards[ui.boardId].categories[m.catIdx].clues[m.valIdx];
+  var tooBig = files.filter(function(f){ return f.size > MAX_VIDEO_BYTES; });
+  var okFiles = files.filter(function(f){ return f.size <= MAX_VIDEO_BYTES; });
+  if(tooBig.length) showToast("Skipped a video over 150MB — trim it first.");
+  Promise.all(okFiles.map(function(f){
+    var id = uid("vid");
+    return idbPut(id, f).then(function(){ return {id:id, name:f.name, size:f.size, type:f.type}; });
+  })).then(function(metas){
+    metas.forEach(function(meta){ clue.videos.push(meta); });
+    saveStore();
+    renderModal();
+  }).catch(function(){ showToast("Couldn't save that video — it may be too large for available storage."); });
+  evt.target.value = "";
+};
+App.removeClueVideo = function(idx){
+  var m = ui.modal;
+  var clue = store.boards[ui.boardId].categories[m.catIdx].clues[m.valIdx];
+  var meta = clue.videos[idx];
+  clue.videos.splice(idx,1);
+  saveStore();
+  renderModal();
+  if(meta){
+    idbDelete(meta.id);
+    var cached = videoUrlCache[meta.id];
+    if(cached && cached !== "loading" && cached !== "error") URL.revokeObjectURL(cached);
+    delete videoUrlCache[meta.id];
+  }
+};
+App.showFaq = function(){
+  ui.modal = { type: "faq" };
+  renderModal();
+};
+App.closeModal = function(){
+  ui.modal = null;
+  render();
+};
+
+App.openClue = function(ci, vi){
+  var board = store.boards[ui.boardId];
+  var game = getGame(board.id);
+  var key = clueKey(ci,vi);
+  ui.modal = {type:"play-clue", catIdx:ci, valIdx:vi, phase: game.used[key] ? "result" : "question"};
+  renderModal();
+};
+App.revealAnswer = function(){ ui.modal.phase = "bride"; renderModal(); };
+
+App.scoreClue = function(winner){
+  var board = store.boards[ui.boardId];
+  var game = getGame(board.id);
+  var m = ui.modal;
+  var key = clueKey(m.catIdx, m.valIdx);
+  var value = board.categories[m.catIdx].clues[m.valIdx].value;
+  game.used[key] = {by: winner};
+  if(winner === "bride") game.scores.bride += value;
+  saveStore();
+  ui.modal = null;
+  render();
+  if(Object.keys(game.used).length === board.categories.length * VALUES.length){
+    setTimeout(function(){ ui.modal = {type:"game-over"}; renderModal(); }, 250);
+  }
+};
+
+App.undoScore = function(){
+  var board = store.boards[ui.boardId];
+  var game = getGame(board.id);
+  var m = ui.modal;
+  var key = clueKey(m.catIdx, m.valIdx);
+  var used = game.used[key];
+  if(used){
+    var value = board.categories[m.catIdx].clues[m.valIdx].value;
+    if(used.by === "bride") game.scores.bride -= value;
+    delete game.used[key];
+    saveStore();
+  }
+  ui.modal = null;
+  render();
+};
+
+App.endGame = function(){
+  ui.modal = {type:"game-over"};
+  renderModal();
+};
+App.playAgain = function(){
+  store.games[ui.boardId] = newGame();
+  saveStore();
+  ui.modal = null;
+  render();
+};
+App.confirmResetGame = function(id){
+  if(!confirm("Reset scores and clear all played clues for this board?")) return;
+  store.games[id] = newGame();
+  saveStore();
+  render();
+};
+
+window.App = App;
+render();
+})();
+</script>
+</body>
+</html>
