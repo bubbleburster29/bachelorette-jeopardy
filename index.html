@@ -934,6 +934,10 @@ function renderFaq(){
       q: "Can I use this on more than one device at once?",
       a: "Not for a single live game — since everything is stored locally, a board only lives on the device that created it. To move a board between devices, use the Excel import/export workflow above, or just play the whole game from one host device/browser (e.g. a laptop connected to a TV)."
     },
+    {
+      q: "If a friend opens this same link, will they see my board?",
+      a: "No — even though you're both visiting the same website, storage is completely separate per browser/device. Your friend gets their own blank Home screen and can build their own board; they can never see, edit, or accidentally overwrite yours, and you can't see theirs either. Sharing the link only shares the app itself, never anyone's actual game content."
+    },
   ];
 
   var body = faqs.map(function(item){
